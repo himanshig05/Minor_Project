@@ -6,7 +6,9 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { classifyAudioBuffer } = require('../services/gemini');
-const { extractAudioToWav } = require('../utils/ffmpeg');
+const { classifyFramesWithGemini } = require('../services/gemini');
+const { extractFramesFromVideo } = require('../utils/ffmpeg');
+
 
 const router = express.Router();
 
@@ -33,24 +35,32 @@ router.post('/verify-video', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) {
       const err = new Error('No file uploaded. Use form-data field name "file".');
-      err.status = 400; throw err;
+      err.status = 400;
+      throw err;
     }
 
-    // Write buffer to temp file
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'video-'));
-    const inputPath = path.join(tmpDir, 'input');
+    const inputPath = path.join(tmpDir, 'input.mp4');
     fs.writeFileSync(inputPath, req.file.buffer);
 
-    const wavPath = path.join(tmpDir, 'audio.wav');
-    await extractAudioToWav(inputPath, wavPath);
-    const audioBuffer = fs.readFileSync(wavPath);
+    const framesDir = path.join(tmpDir, 'frames');
+    fs.mkdirSync(framesDir);
+    await extractFramesFromVideo(inputPath, framesDir, 20);
 
-    const result = await classifyAudioBuffer(audioBuffer, 'audio/wav');
+    const frameFiles = fs.readdirSync(framesDir)
+      .filter(f => f.endsWith('.jpg'))
+      .map(f => fs.readFileSync(path.join(framesDir, f)));
 
-    // Cleanup
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_e) {}
+    const result = await classifyFramesWithGemini(frameFiles);
 
-    res.json({ bytes: req.file.size, mimeType: req.file.mimetype, result });
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+
+    res.json({ 
+      bytes: req.file.size, 
+      mimeType: req.file.mimetype, 
+      frames: frameFiles.length, 
+      result 
+    });
   } catch (err) {
     next(err);
   }
