@@ -8,6 +8,7 @@ const os = require('os');
 const { classifyAudioBuffer } = require('../services/gemini');
 const { classifyFramesWithGemini } = require('../services/gemini');
 const { extractFramesFromVideo } = require('../utils/ffmpeg');
+const { classifyImagesWithGemini } = require('../services/gemini');
 
 
 const router = express.Router();
@@ -65,6 +66,29 @@ router.post('/verify-video', upload.single('file'), async (req, res, next) => {
     next(err);
   }
 });
+
+router.post('/verify-image', upload.array('files', 5), async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      const err = new Error('No images uploaded. Use form-data field name "files".');
+      err.status = 400;
+      throw err;
+    }
+
+    // Convert each uploaded image buffer
+    const imageBuffers = req.files.map(file => file.buffer);
+    const result = await classifyImagesWithGemini(imageBuffers);
+
+    res.json({
+      files: req.files.length,
+      totalBytes: req.files.reduce((sum, f) => sum + f.size, 0),
+      result
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 module.exports = router;
 

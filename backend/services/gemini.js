@@ -158,4 +158,61 @@ async function classifyAudioBuffer(buffer, mimeType) {
   }
 }
 
-module.exports = { classifyNewsText, classifyAudioBuffer, classifyFramesWithGemini };
+async function classifyImagesWithGemini(imageBuffers) {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Use the most capable, multimodal model
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-pro-exp-02-05" });
+
+  const prompt = `
+You are an incredibly skeptical forensic image analyst.
+ASSUME every image might be AI-generated, photoshopped, or manipulated unless proven real.
+
+Rules:
+- Analyze facial texture, lighting consistency, reflections, symmetry, and skin irregularities.
+- Be paranoid: if anything looks "too perfect", "too smooth", or "slightly off", classify as FAKE or UNCERTAIN.
+- Avoid overconfidence; confidence > 0.75 is allowed ONLY if all evidence strongly suggests real photography.
+- If you’re unsure, always prefer "UNCERTAIN" or "FAKE".
+- Output only strict JSON (no markdown).
+
+Return JSON exactly as:
+{
+  "verdict": "FAKE" | "UNCERTAIN" | "REAL",
+  "confidence": number (0.0–1.0),
+  "rationale": "1-2 sentence explanation of reasoning"
+}
+  `;
+
+  const inputs = [
+    { text: prompt },
+    ...imageBuffers.map(buf => ({
+      inlineData: { data: buf.toString('base64'), mimeType: 'image/jpeg' }
+    }))
+  ];
+
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: inputs }]
+  });
+
+  const raw = result.response.text().trim();
+  const cleaned = raw.replace(/^```(json)?/i, '').replace(/```$/i, '').trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    // Skepticism adjustments
+    parsed.confidence = Math.max(0, Math.min(parsed.confidence * 0.75, 0.85));
+    if (parsed.verdict === "REAL" && parsed.confidence < 0.8)
+      parsed.verdict = "UNCERTAIN";
+    return parsed;
+  } catch (err) {
+    return {
+      verdict: "UNCERTAIN",
+      confidence: 0.3,
+      rationale: "Model output unclear — defaulting to skeptical uncertainty."
+    };
+  }
+}
+
+
+module.exports = { classifyNewsText, classifyAudioBuffer, classifyFramesWithGemini, classifyImagesWithGemini };
