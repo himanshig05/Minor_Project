@@ -20,7 +20,7 @@ export default function FakeNewsPage({ onNavigate, onResults }) {
         ? { text: textInput }
         : { url: urlInput };
 
-      const response = await fetch(`${BASE_URL}/${endpoint}`, {
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
