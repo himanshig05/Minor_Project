@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import HomePage from './components/Home';
 import FakeNewsPage from './components/FakeNewsPage';
-import DeepfakePage from './components/DeepFakePage';
+import DeepfakeImagePage from './components/DeepFakePage';
 import ResultsPage from './components/ResultsPage';
 import './App.css';
 
@@ -27,8 +27,8 @@ export default function App() {
       {currentPage === 'fake-news' && (
         <FakeNewsPage onNavigate={handleNavigate} onResults={handleResults} />
       )}
-      {currentPage === 'deepfake' && (
-        <DeepfakePage onNavigate={handleNavigate} onResults={handleResults} />
+      {currentPage === 'deepfake-image' && (
+        <DeepfakeImagePage onNavigate={handleNavigate} onResults={handleResults} />
       )}
       {currentPage === 'results' && (
         <ResultsPage data={results} onNavigate={handleNavigate} />

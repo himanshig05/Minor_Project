@@ -1,4 +1,4 @@
-import "./Home.css";
+import './Home.css';
 
 export default function HomePage({ onNavigate }) {
   return (
@@ -6,8 +6,8 @@ export default function HomePage({ onNavigate }) {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">Authenticity Analysis</h1>
-          {/* <p className="tagline">Trust verification powered by AI</p> */}
+          <h1 className="logo">VerifyAI</h1>
+          <p className="tagline">Trust verification powered by AI</p>
         </div>
       </header>
 
@@ -37,19 +37,19 @@ export default function HomePage({ onNavigate }) {
           <button className="card-button">Analyze Text or URL</button>
         </div>
 
-        {/* Deepfake Detection Card */}
-        <div className="feature-card deepfake-card" onClick={() => onNavigate('deepfake')}>
+        <div className="feature-card deepfake-card" onClick={() => onNavigate('deepfake-image')}>
           <div className="card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
-          <h3 className="card-title">Deepfake Detection</h3>
+          <h3 className="card-title">Deepfake Image Detection</h3>
           <p className="card-description">
-            Identify manipulated or synthetically generated videos with AI analysis
+            Identify manipulated or synthetically generated images with AI analysis
           </p>
-          <button className="card-button">Upload Video</button>
+          <button className="card-button">Upload Image</button>
         </div>
       </section>
 
@@ -76,7 +76,7 @@ export default function HomePage({ onNavigate }) {
 
       {/* Footer */}
       <footer className="footer">
-        <p>&copy; 2025 Authenticity Analysis. All rights reserved.</p>
+        <p>&copy; 2025 VerifyAI. All rights reserved.</p>
       </footer>
     </div>
   );
