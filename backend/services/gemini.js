@@ -34,7 +34,7 @@ Rules:
 Return a compact JSON ONLY:
 {
   "verdict": "FAKE" | "UNCERTAIN" | "REAL",
-  "confidence": number (0.0–1.0),
+  "confidence": number (0.0–0.9),
   "rationale": "1-2 sentence reasoning"
 }
 
@@ -84,7 +84,7 @@ async function classifyNewsText(text) {
     'Rules:',
     '- verdict: one of "FAKE", "REAL", "UNSURE"',
     '- is_fake: boolean, true only if verdict is FAKE',
-    '- confidence: number from 0 to 1',
+    '- confidence: number from 0 to 0.9',
     '- rationale: concise explanation (1-3 sentences).',
     'Do not include code fences or any extra text.'
   ].join('\n');
